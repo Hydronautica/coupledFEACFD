@@ -1,0 +1,101 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2012                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+
+scale   1;
+xmin	-45 ;
+xmax	75;
+ymin	-25;
+ymax	25;
+zmin	0;
+zmax	150;
+cell0	10 ;
+Nx	#eval "round(($xmax - $xmin)/$cell0)" ;
+Ny	#eval "round(($ymax - $ymin)/$cell0)" ;
+Nz	#eval "round(($zmax - $zmin)/$cell0)" ;
+vertices        
+(
+    ( $xmin $ymin $zmin ) //0
+    ( $xmax $ymin $zmin ) //1
+    ( $xmin $ymax $zmin ) //2
+    ( $xmax $ymax $zmin ) //3
+    ( $xmin $ymin $zmax ) //4
+    ( $xmax $ymin $zmax ) //5
+    ( $xmin $ymax $zmax ) //6
+    ( $xmax $ymax $zmax ) //7                   
+);
+
+
+blocks
+(   
+    hex (0 1 3 2 4 5 7 6) ( $Nx $Ny $Nz )
+    simpleGrading (1 1 1)
+    
+);
+
+edges
+(
+);
+
+boundary
+(
+    // Dummy patch to trigger overset interpolation before any other bcs
+    
+    bottom
+    {
+        type wall;
+        faces
+        (
+            (0 1 3 2) //bottom
+            
+        );
+    }
+    
+    inlet
+    {
+    	type patch;
+    	faces
+    	(
+    		(0 4 6 2) //inlet
+    	);
+    }
+    
+    outlet
+    {
+    	type patch;
+    	faces
+    	(
+    		(1 5 7 3) //outlet
+    		(0 1 5 4) //back
+    		(2 3 7 6) //front
+    	);
+    }
+    
+    atmosphere
+    {
+        type patch;
+        faces
+        (
+            (4 5 7 6)
+        );
+    }
+);
+
+mergePatchPairs
+(
+);
+
+// ************************************************************************* //
